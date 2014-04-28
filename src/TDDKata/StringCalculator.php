@@ -4,11 +4,13 @@ namespace TDDKata;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use TDDKata\Exception\LoggerException;
 
 class StringCalculator implements LoggerAwareInterface
 {
     private $extractor;
     private $logger;
+    private $webservice;
 
     public function __construct()
     {
@@ -20,6 +22,11 @@ class StringCalculator implements LoggerAwareInterface
         $this->logger = $logger;
     }
 
+    public function setWebservice(WebserviceInterface $webservice)
+    {
+        $this->webservice = $webservice;
+    }
+
     public function add($string)
     {
         $numbers = $this->extractor->extract($string);
@@ -28,12 +35,22 @@ class StringCalculator implements LoggerAwareInterface
 
         $sum = $this->sum($numbers);
 
-        if($this->logger != null)
-        {
-            $this->logger->info('Sum is '.$sum);
-        }
+        $this->logSum($sum);
 
         return $sum;
+    }
+
+    private function logSum($sum)
+    {
+        try {
+            if ($this->logger != null) {
+                $this->logger->info('Sum is ' . $sum);
+            }
+        } catch(LoggerException $exception) {
+            if($this->webservice != null) {
+                $this->webservice->notify("Logger exception: ".$exception->getMessage());
+            }
+        }
     }
 
     private function throwExceptionIfAnyNegativeNumber($numbers)

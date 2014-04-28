@@ -2,6 +2,7 @@
 
 namespace TDDKata\Tests;
 
+use TDDKata\Exception\LoggerException;
 use TDDKata\StringCalculator;
 
 class StringCalculatorTest extends \PHPUnit_Framework_TestCase
@@ -91,5 +92,21 @@ class StringCalculatorTest extends \PHPUnit_Framework_TestCase
 
         $this->calculator->setLogger($loggerMock);
         $this->calculator->add("1,2");
+    }
+
+    public function testAddNotifyWebserviceOnLoggerException()
+    {
+        $loggerStub = $this->getMock('Psr\Log\LoggerInterface');
+        $loggerStub->expects($this->any())
+                   ->method('info')
+                   ->willThrowException(new LoggerException());
+
+        $webserviceMock = $this->getMock('TDDKata\WebserviceInterface');
+        $webserviceMock->expects($this->once())
+                       ->method('notify');
+
+        $this->calculator->setLogger($loggerStub);
+        $this->calculator->setWebservice($webserviceMock);
+        $this->calculator->add("1");
     }
 }
