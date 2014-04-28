@@ -2,32 +2,36 @@
 
 namespace TDDKata;
 
-class StringCalculator
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+
+class StringCalculator implements LoggerAwareInterface
 {
     private $extractor;
+    private $logger;
 
     public function __construct()
     {
         $this->extractor = new NumberExtractor();
     }
 
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function add($string)
     {
-        if(empty($string))
-        {
-            return 0;
-        }
-
-        if(preg_match("/^\d+$/", $string))
-        {
-            return intval($string);
-        }
-
         $numbers = $this->extractor->extract($string);
 
         $this->throwExceptionIfAnyNegativeNumber($numbers);
 
         $sum = $this->sum($numbers);
+
+        if($this->logger != null)
+        {
+            $this->logger->info('Sum is '.$sum);
+        }
 
         return $sum;
     }

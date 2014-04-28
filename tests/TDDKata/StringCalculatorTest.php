@@ -82,4 +82,14 @@ class StringCalculatorTest extends \PHPUnit_Framework_TestCase
         $result = $this->calculator->add("//[**][%]\n1**2%3");
         $this->assertSame(6, $result);
     }
+
+    public function testAddSumIsLogged()
+    {
+        $loggerMock = $this->getMock('Psr\Log\LoggerInterface');
+        $loggerMock->expects($this->once())
+                   ->method('info');
+
+        $this->calculator->setLogger($loggerMock);
+        $this->calculator->add("1,2");
+    }
 }

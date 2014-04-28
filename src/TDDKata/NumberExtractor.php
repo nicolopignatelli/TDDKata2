@@ -6,6 +6,16 @@ class NumberExtractor
 {
     public function extract($string)
     {
+        if(empty($string))
+        {
+            return [0];
+        }
+
+        if(preg_match("/^\d+$/", $string))
+        {
+            return [intval($string)];
+        }
+
         $delimiters = $this->getDelimiters($string);
 
         $delimitersPattern = $this->getDelimitersPattern($delimiters);
